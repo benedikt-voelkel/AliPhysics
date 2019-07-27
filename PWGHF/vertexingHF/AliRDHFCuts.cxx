@@ -639,12 +639,12 @@ Bool_t AliRDHFCuts::IsEventSelected(AliVEvent *event) {
     }
     if(fTimeRangeCut.CutEvent((AliAODEvent*)event)){
       // use same fWhyRejection as for physics selection, to have proper counting of events for norm
-      if(accept) fWhyRejection=7;
+      if(accept) fWhyRejection=15;
       fEvRejectionBits+=1<<kBadTimeRange;
       accept=kFALSE;
     }
   }
-  
+
   // centrality selection
   if (fUseCentrality!=kCentOff) {
     Int_t rejection=IsEventSelectedInCentrality(event);
@@ -856,7 +856,7 @@ Bool_t AliRDHFCuts::IsEventSelectedWithAliEventCuts(AliVEvent *event) {
   else fAliEventCuts->SetManualMode(kFALSE);
 
   if(fUseTimeRangeCutForPbPb2018) fAliEventCuts->UseTimeRangeCut();
-    
+
   // setup cuts
   TString selTrigClassClass="";
   if(!isMC && (event->GetRunNumber()<136851 || event->GetRunNumber()>139517)) {
@@ -916,12 +916,12 @@ Bool_t AliRDHFCuts::IsEventSelectedWithAliEventCuts(AliVEvent *event) {
   if(fUseTimeRangeCutForPbPb2018){
     if(!fAliEventCuts->PassedCut(AliEventCuts::kTimeRangeCut)){
       // use same fWhyRejection as for physics selection, to have proper counting of events for norm
-      if(accept) fWhyRejection=7;
+      if(accept) fWhyRejection=15;
       fEvRejectionBits+=1<<kBadTimeRange;
       accept=kFALSE;
     }
   }
-  
+
   // centrality selection
   if (fUseCentrality!=kCentOff) {
     Int_t rejection=IsEventSelectedInCentrality(event);

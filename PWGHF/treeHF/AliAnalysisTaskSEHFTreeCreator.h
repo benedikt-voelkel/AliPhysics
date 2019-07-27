@@ -8,7 +8,7 @@
 
 ///*************************************************************************
 /// \class AliAnalysisTaskSEHFTreeCreator
-/// 
+///
 // \authors:
 // F. Catalano, fabio.catalano@cern.ch
 // A. Festanti, andrea.festanti@cern.ch
@@ -65,18 +65,18 @@ class AliRhoParameter;
 class AliAnalysisTaskSEHFTreeCreator : public AliAnalysisTaskSE
 {
 public:
-  
+
   enum JetAlgorithm{
     antikt,
     kt,
     ca
   };
-   
+
     AliAnalysisTaskSEHFTreeCreator();
     AliAnalysisTaskSEHFTreeCreator(const char *name,TList *cutsList, int fillNJetTrees, bool fillJetConstituentTrees);
     virtual ~AliAnalysisTaskSEHFTreeCreator();
-    
-    
+
+
     /// Implementation of interface methods
     virtual void UserCreateOutputObjects();
     virtual void Init();
@@ -85,8 +85,8 @@ public:
     virtual void ExecOnce();
     virtual Bool_t RetrieveEventObjects();
     virtual void Terminate(Option_t *option);
-    
-    
+
+
     void SetReadMC(Bool_t opt=kFALSE){fReadMC=opt;}
     void SetSystem(Int_t opt){fSys=opt;}
     void SetAODMismatchProtection(Int_t opt=1) {fAODProtection=opt;}
@@ -106,7 +106,7 @@ public:
     void SetPIDoptDstarTree(Int_t opt){fPIDoptDstar=opt;}
     void SetPIDoptLc2V0bachelorTree(Int_t opt){fPIDoptLc2V0bachelor=opt;}
     void SetFillMCGenTrees(Bool_t fillMCgen) {fFillMCGenTrees=fillMCgen;}
-  
+
     void SetMinJetPtCorr(double pt) { fMinJetPtCorr = pt; }
     void SetFillJetEtaPhi(bool b) { fFillJetEtaPhi = b; }
     void SetFillPtCorr(bool b) { fFillPtCorr = b; }
@@ -126,29 +126,29 @@ public:
     void SetJetAlgorithm(Int_t i) {fJetAlgorithm = i; }
     void SetSubJetAlgorithm(Int_t i) {fSubJetAlgorithm = i; }
     void SetMinJetPt(Double_t d) {fMinJetPt = d; }
-  
+
     void SetDsMassKKOption(AliHFTreeHandlerDstoKKpi::massKKopt opt) {fDsMassKKOpt=opt;}
     void SetLc2V0bachelorCalcSecoVtx(Int_t opt=1) {fLc2V0bachelorCalcSecoVtx=opt;}
-  
+
     void SetTreeSingleTrackVarsOpt(Int_t opt) {fTreeSingleTrackVarsOpt=opt;}
-  
+
     Int_t  GetSystem() const {return fSys;}
     Bool_t GetWriteOnlySignalTree() const {return fWriteOnlySignal;}
-    
+
     void Process2Prong(TClonesArray *array2prong, AliAODEvent *aod, TClonesArray *arrMC, Float_t bfield);
     void Process3Prong(TClonesArray *array3Prong, AliAODEvent *aod, TClonesArray *arrMC, Float_t bfield);
     void ProcessDstar(TClonesArray *arrayDstar, AliAODEvent *aod, TClonesArray *arrMC, Float_t bfield);
     void ProcessCasc(TClonesArray *arrayCasc, AliAODEvent *aod, TClonesArray *arrMC, Float_t bfield);
     void ProcessMCGen(TClonesArray *mcarray);
-  
+
     Bool_t CheckDaugAcc(TClonesArray* arrayMC,Int_t nProng, Int_t *labDau);
     AliAODVertex* ReconstructBplusVertex(const AliVVertex *primary, TObjArray *tracks, Double_t bField, Double_t dispersion);
-  
+
     void SetNsigmaTPCDataDrivenCorrection(Int_t syst) {
-        fEnableNsigmaTPCDataCorr=true; 
-        fSystemForNsigmaTPCDataCorr=syst; 
+        fEnableNsigmaTPCDataCorr=true;
+        fSystemForNsigmaTPCDataCorr=syst;
     }
-  
+
     // Particles (tracks or MC particles)
     //-----------------------------------------------------------------------------------------------
     void                        SetFillParticleTree(Bool_t b) {fFillParticleTree = b;}
@@ -167,16 +167,16 @@ public:
     AliJetContainer* AddJetContainer(const char *n, UInt_t accType, Float_t jetRadius);
     AliJetContainer* GetJetContainer(Int_t i=0) const;
     void FillJetTree();
-  
-    
+
+
     unsigned int GetEvID();
-    
+
 private:
-    
+
     AliAnalysisTaskSEHFTreeCreator(const AliAnalysisTaskSEHFTreeCreator&);
     AliAnalysisTaskSEHFTreeCreator& operator=(const AliAnalysisTaskSEHFTreeCreator&);
-    
-    
+
+
     unsigned int            fEventNumber;
     TH1F                    *fNentries;                            //!<!   histogram with number of events on output slot 1
     TH2F                    *fHistoNormCounter;                    //!<!   histogram with number of events on output slot 1
@@ -275,13 +275,13 @@ private:
     TString                 fFileName;
     unsigned int            fDirNumber;
     Int_t                   fnTracklets;                           /// number of tracklets
-    Int_t                   fnV0A;                                 /// V0A multiplicity 
+    Int_t                   fnV0A;                                 /// V0A multiplicity
 
     Bool_t                  fFillMCGenTrees;                       /// flag to enable fill of the generated trees
-  
+
     Int_t                   fDsMassKKOpt;                          /// option for Ds massKK (mass or delta mass)
     Int_t                   fLc2V0bachelorCalcSecoVtx;             /// option to calculate the secondary vertex for Lc2V0bachelor. False by default, has to be added to AddTask in case we want to start using it.
-  
+
     Int_t                   fTreeSingleTrackVarsOpt;               /// option for single-track variables to be filled in the trees
 
     Double_t                fJetRadius;                            //Setting the radius for jet finding
@@ -289,47 +289,47 @@ private:
     Int_t                   fJetAlgorithm;                         //Setting the jet finding algorithm
     Int_t                   fSubJetAlgorithm;                      //Setting the jet finding algorithm
     Double_t                fMinJetPt;                             //Setting the jet finding min pT
-  
+
     // Particles (tracks / MC particles)
     // Add a single AliTrackContainer and/or AliMCParticleContainer to select particles
     // A separate (identical) AliParticleTreeHandler will be used to fill each tree.
     //-----------------------------------------------------------------------------------------------
     bool                    fFillParticleTree;                     ///< Store tree of all tracks inside the jet
     bool                    fFillTrackletTree;                     ///< Store tree of all tracklets
-  
+
     TTree*                  fVariablesTreeParticle;                //!<! Particle tree
     TTree*                  fVariablesTreeTracklet;                //!<! Tracklet tree
     TTree*                  fVariablesTreeGenParticle;             //!<! MC particle tree
-  
+
     AliParticleTreeHandler* fTreeHandlerParticle;                  //!<! handler object for particle tree
     AliTrackletTreeHandler* fTreeHandlerTracklet;                  //!<! handler object for tracklet tree
     AliParticleTreeHandler* fTreeHandlerGenParticle;               //!<! handler object for MC particle tree
-  
+
     TObjArray               fParticleCollArray;                    ///< particle/track collection array
-  
+
     // Jets
     //-----------------------------------------------------------------------------------------------
-  
+
     // Write N jet trees, according to constructor argument. Should match number of jet containers added.
     // If fFillJetConstituentTrees is true, then also fill N separate trees of jet constituent info.
     Int_t                   fWriteNJetTrees;                       ///< number of jet trees to write
     bool                    fFillJetConstituentTrees;              ///< Store tree of all tracks inside the jet
-  
+
     std::vector<TTree*>     fVariablesTreeJet;                     //!<! vector of jet trees
     std::vector<TTree*>     fVariablesTreeJetConstituent;          //!<! vector of jet constituent trees
 
     std::vector<AliJetTreeHandler*> fTreeHandlerJet;               //!<! vector of handler objects for jet tree
-  
+
     // Jet container and array
     Bool_t                  fLocalInitialized;                     ///< whether or not the task has been already initialized
     TObjArray               fJetCollArray;                         ///< array of jet containers
     double                  fMinJetPtCorr;                         ///< Min jet Pt (background subtracted) to fill jet into tree
-  
+
     // Jet background subtraction
     TString                 fRhoName;                              ///<  rho name
     AliRhoParameter        *fRho;                                  //!<! event rho
     Double_t                fRhoVal;                               //!<! event rho value
-  
+
     // Fill jet tree according to the below flags. By default, it only contains: event id, jet id
     bool                    fFillJetEtaPhi;                        ///< Jet eta/phi
     bool                    fFillPtCorr;                           ///< Pt of the jet (GeV/c) (background subtracted)
@@ -343,10 +343,10 @@ private:
     bool                    fFillMatchingJetID;                    ///< jet matching
 
 
-    
+
     bool                    fFillJets;                             //FillJetInfo
     bool                    fDoJetSubstructure;                    //FillJetSubstructure
-  
+
     bool fEnableNsigmaTPCDataCorr; /// flag to enable data-driven NsigmaTPC correction
     int fSystemForNsigmaTPCDataCorr; /// system for data-driven NsigmaTPC correction
 
@@ -356,4 +356,3 @@ private:
 };
 
 #endif
-
