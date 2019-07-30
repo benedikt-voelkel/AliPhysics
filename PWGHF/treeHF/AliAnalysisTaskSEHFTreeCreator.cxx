@@ -1135,7 +1135,9 @@ void AliAnalysisTaskSEHFTreeCreator::UserExec(Option_t */*option*/)
     /// Execute analysis for current event:
 
     AliAODEvent *aod = dynamic_cast<AliAODEvent*> (InputEvent());
+    
 
+    std::cerr << "###############################\nNew event\n###########################" << std::endl;
     fNentries->Fill(0); // all events
     if(fAODProtection>=0){
         //   Protection against different number of events in the AOD and deltaAOD
@@ -1307,6 +1309,7 @@ void AliAnalysisTaskSEHFTreeCreator::UserExec(Option_t */*option*/)
     Bool_t isEvRejCent  = fEvSelectionCuts->IsEventRejectedDueToCentrality();
 
     if(!isEvSel && isEvRejCent){
+      std::cerr << "Event rejected fue to centrality" << std::endl;
       return; //cut only centrality, else tag only
     }
     if(isEvSel) fNentries->Fill(4);
@@ -1316,6 +1319,8 @@ void AliAnalysisTaskSEHFTreeCreator::UserExec(Option_t */*option*/)
     fzVtxReco = vtx->GetZ();
     fNtracks = aod->GetNumberOfTracks();
     fIsEvRej = fEvSelectionCuts->GetEventRejectionBitMap();
+    std::cerr << "\"fIsEvRej\": " << fIsEvRej << std::endl;
+    std::cerr << "\"isEvSel\": " << isEvSel << std::endl;
     fRunNumber=aod->GetRunNumber();
     //n tracklets
     AliAODTracklets* tracklets=aod->GetTracklets();
@@ -1326,6 +1331,7 @@ void AliAnalysisTaskSEHFTreeCreator::UserExec(Option_t */*option*/)
      Double_t eta=-TMath::Log(TMath::Tan(theta/2.));
      if(eta>-1.0 && eta<1.0) countTreta1++;//count at central rapidity
   }
+    //if(!isEvSel) return;
     fnTracklets=countTreta1;
     //v0A multiplicity
     Int_t vzeroMultA=0;
@@ -1335,6 +1341,8 @@ void AliAnalysisTaskSEHFTreeCreator::UserExec(Option_t */*option*/)
     }
     fnV0A=vzeroMultA;
     fEventID = GetEvID();
+
+    std::cerr << "Run number: " << fRunNumber << "\nEvent number: " << fEventID << std::endl;
 
     if(fIsEvRej == 0 && !isEvSel) {
       AliError(Form("event flagged as not rejected but also not selected!", GetName()));
@@ -1919,6 +1927,7 @@ void AliAnalysisTaskSEHFTreeCreator::Process2Prong(TClonesArray *array2prong, Al
 //--------------------------------------------------------
 void AliAnalysisTaskSEHFTreeCreator::Process3Prong(TClonesArray *array3Prong, AliAODEvent *aod, TClonesArray *arrMC, Float_t bfield){
 
+    std::cerr << "Process 3Prong" << std::endl;
     AliAODVertex *vtx1 = (AliAODVertex*)aod->GetPrimaryVertex();
 
     Int_t n3prong = array3Prong->GetEntriesFast();
@@ -1944,12 +1953,17 @@ void AliAnalysisTaskSEHFTreeCreator::Process3Prong(TClonesArray *array3Prong, Al
     for (Int_t i3prong = 0; i3prong < n3prong; i3prong++) {
         fNentries->Fill(15);
 
+	std::cerr << "-----------------------\n";
+	std::cerr << "Run " << fRunNumber << ", event " << GetEvID() << ", Candidate " << i3prong << std::endl;
+	std::cerr << "-----------------------" << std::endl;
+
         //Ds
         Bool_t isDstagged=kTRUE;
         AliAODRecoDecayHF3Prong *ds    = (AliAODRecoDecayHF3Prong*)array3Prong->UncheckedAt(i3prong);
         if(fUseSelectionBit && !(ds->HasSelectionBit(AliRDHFCuts::kDsCuts))){
             isDstagged=kFALSE;
         }
+
 
         if(isDstagged && fWriteVariableTreeDs){
             fNentries->Fill(16);
@@ -2228,19 +2242,25 @@ void AliAnalysisTaskSEHFTreeCreator::Process3Prong(TClonesArray *array3Prong, Al
 
         //*************************************
         //LctopKpi
+        std::cerr << "Before checking \"isLctopKpitagged\"" << std::endl;
         Bool_t isLctopKpitagged=kTRUE;
         AliAODRecoDecayHF3Prong *lctopkpi = (AliAODRecoDecayHF3Prong*)array3Prong->UncheckedAt(i3prong);
         if(fUseSelectionBit && !(lctopkpi->HasSelectionBit(AliRDHFCuts::kLcCuts))){
             isLctopKpitagged=kFALSE;
         }
         if(isLctopKpitagged && fWriteVariableTreeLctopKpi){
+	    std::cerr << "After \"isLctopKpitagged\", so it was tagged" << std::endl;
             nFilteredLctopKpi++;
             fNentries->Fill(22);
-            if((vHF->FillRecoCand(aod,lctopkpi))) {////Fill the data members of the candidate only if they are empty.
+	    Bool_t fillRecoCand = vHF->FillRecoCand(aod,lctopkpi);
+	    std::cerr << "\"fillRecoCand\" is " << fillRecoCand << std::endl;
+            if(fillRecoCand) {////Fill the data members of the candidate only if they are empty.
 
                 Int_t isSelectedFilt    = fFiltCutsLctopKpi->IsSelected(lctopkpi,AliRDHFCuts::kAll,aod);
                 //Printf("isSelectedFilt = %i isSelectedAnalysis = %i",isSelectedFilt,isSelectedAnalysis);
+                std::cerr << "\"isSelectedFilt\" is " << isSelectedFilt << " and no before the check" << std::endl;
                 if(isSelectedFilt){
+		  std::cerr << "Check on \"isSelectedFilt\" successful" << std::endl;
                   fNentries->Fill(23);
                   nSelectedLctopKpi++;
 
@@ -2261,6 +2281,15 @@ void AliAnalysisTaskSEHFTreeCreator::Process3Prong(TClonesArray *array3Prong, Al
                   fCutsLctopKpi->SetUsePID(isUsePidAn);
                   Bool_t isSelTracksAnCuts=kFALSE;
                   Int_t isSelectedTrackAnalysis = fCutsLctopKpi->IsSelected(lctopkpi,AliRDHFCuts::kTracks,aod);
+
+
+		  std::cerr << "SELECTION FLAGS" << std::endl;
+		  std::cerr << "\"isSelectedFilt\": " << isSelectedFilt << "\n"
+			       "\"isSelectedAnalysis\": " << isSelectedAnalysis << "\n"
+			       "\"isSelectedPidAnalysis\": " << isSelectedPidAnalysis << "\n"
+			       "\"isSelectedTopoAnalysis\": " << isSelectedTopoAnalysis << "\n"
+			       "\"isSelectedTrackAnalysis\": " << isSelectedTrackAnalysis << std::endl;
+
                   if(isSelectedTrackAnalysis > 0)                            isSelTracksAnCuts=kTRUE;
                   if(isSelectedAnalysis==1 || isSelectedAnalysis==3)         isSelAnCutspKpi=kTRUE;
                   if(isSelectedAnalysis>2)                                   isSelAnCutspiKp=kTRUE;
@@ -2276,13 +2305,20 @@ void AliAnalysisTaskSEHFTreeCreator::Process3Prong(TClonesArray *array3Prong, Al
                   lctopkpi->SetOwnPrimaryVtx(vtx1);
                   unsetvtx=kTRUE;
                   }
+
+		  std::cerr << "Does this cand. had its own primary vertex: " << unsetvtx << std::endl;
+
                   Bool_t recVtx=kFALSE;
                   AliAODVertex *origownvtx=0x0;
-                  if(fFiltCutsLctopKpi->GetIsPrimaryWithoutDaughters()){
-                  if(lctopkpi->GetOwnPrimaryVtx()) origownvtx=new AliAODVertex(*lctopkpi->GetOwnPrimaryVtx());
-                  if(fFiltCutsLctopKpi->RecalcOwnPrimaryVtx(lctopkpi,aod))recVtx=kTRUE;
-                  else fFiltCutsLctopKpi->CleanOwnPrimaryVtx(lctopkpi,aod,origownvtx);
+                  auto primWithoutDaughters = fFiltCutsLctopKpi->GetIsPrimaryWithoutDaughters();
+		  std::cerr << "\"primWithoutDaughters\" is " << primWithoutDaughters << std::endl;
+                  if(primWithoutDaughters){
+                    if(lctopkpi->GetOwnPrimaryVtx()) origownvtx=new AliAODVertex(*lctopkpi->GetOwnPrimaryVtx());
+                    if(fFiltCutsLctopKpi->RecalcOwnPrimaryVtx(lctopkpi,aod))recVtx=kTRUE;
+                    else fFiltCutsLctopKpi->CleanOwnPrimaryVtx(lctopkpi,aod,origownvtx);
                   }
+		  std::cerr << "Own primaro vertex was not cleaned: " << recVtx << std::endl;
+		  
 
                   bool isPrimary=kFALSE;
                   bool isFeeddown=kFALSE;
@@ -2292,7 +2328,12 @@ void AliAnalysisTaskSEHFTreeCreator::Process3Prong(TClonesArray *array3Prong, Al
                   Int_t labDp=-1;
                   Float_t ptGenLcpKpi = -99.;
                   int restype = -1;
+
+		  std::cerr << "Now check whether it is pKpi or piKp" << std::endl;
+		  if(!ispKpi && !ispiKp) { std::cerr << "Neither pKpi not piKpi" << std::endl; }
+
                   if(ispKpi) {
+		    std::cerr << "It is pKpi" << std::endl;
                     //read MC
                     if(fReadMC){
                       labDp = lctopkpi->MatchToMC(4122,arrMC,3,pdgLctopKpi);
@@ -2331,8 +2372,10 @@ void AliAnalysisTaskSEHFTreeCreator::Process3Prong(TClonesArray *array3Prong, Al
 
                     // fill tree
                     if(!fReadMC || (issignal || isbkg)) {
+			std::cerr << "Before fill pKpi to tree" << std::endl;
                         fTreeHandlerLctopKpi->SetIsSelectedStd(isSelAnCutspKpi,isSelTopopKpi,isSelPIDpKpi,isSelTracksAnCuts);
-                        fTreeHandlerLctopKpi->SetVariables(fRunNumber,fEventID,ptGenLcpKpi,lctopkpi,bfield,1,fPIDresp);
+                        Bool_t setVars = fTreeHandlerLctopKpi->SetVariables(fRunNumber,fEventID,ptGenLcpKpi,lctopkpi,bfield,1,fPIDresp);
+			std::cerr << "Variables successfully set: " << setVars << std::endl;
                         fTreeHandlerLctopKpi->SetVariableResonantDecay(restype);
 			if (fFillJets) fTreeHandlerLctopKpi->SetJetVars(aod->GetTracks(),lctopkpi);
                         fTreeHandlerLctopKpi->FillTree();
@@ -2346,6 +2389,7 @@ void AliAnalysisTaskSEHFTreeCreator::Process3Prong(TClonesArray *array3Prong, Al
                   labDp=-1;
                   restype = -1;
                   if(ispiKp) {
+		    std::cerr << "It is piKp" << std::endl;
                     //read MC
                     if(fReadMC){
                       labDp = lctopkpi->MatchToMC(4122,arrMC,3,pdgLctopKpi);
@@ -2384,20 +2428,29 @@ void AliAnalysisTaskSEHFTreeCreator::Process3Prong(TClonesArray *array3Prong, Al
 
                     // fill tree
                     if(!fReadMC || (issignal || isbkg)) {
+			std::cerr << "Before fill piKp to tree" << std::endl;
                         fTreeHandlerLctopKpi->SetIsSelectedStd(isSelAnCutspiKp,isSelTopopiKp,isSelPIDpiKp,isSelTracksAnCuts);
-                        fTreeHandlerLctopKpi->SetVariables(fRunNumber,fEventID,ptGenLcpKpi,lctopkpi,bfield,2,fPIDresp);
+                        Bool_t setVars = fTreeHandlerLctopKpi->SetVariables(fRunNumber,fEventID,ptGenLcpKpi,lctopkpi,bfield,2,fPIDresp);
+			std::cerr << "Variables successfully set: " << setVars << std::endl;
                         fTreeHandlerLctopKpi->SetVariableResonantDecay(restype);
 			if (fFillJets) fTreeHandlerLctopKpi->SetJetVars(aod->GetTracks(),lctopkpi);
                         fTreeHandlerLctopKpi->FillTree();
                     }
                   } // end fill piKpi
 
-                if(recVtx)fFiltCutsLctopKpi->CleanOwnPrimaryVtx(lctopkpi,aod,origownvtx);
-                if(unsetvtx) lctopkpi->UnsetOwnPrimaryVtx();
+                if(recVtx) {
+		  std::cerr << "Clean own primary vertex" << std::endl;
+		  fFiltCutsLctopKpi->CleanOwnPrimaryVtx(lctopkpi,aod,origownvtx);
+		}
+                if(unsetvtx) {
+		  std::cerr << "Unset primary vertex" << std::endl;
+		  lctopkpi->UnsetOwnPrimaryVtx();
+		}
                 } //end topol and PID cuts
 
             }//end ok fill reco cand
             else{
+		std::cerr << "NOT tagged" << std::endl;
                 fNentries->Fill(24); //monitor how often this fails
             }
         }//end LctopKpi
