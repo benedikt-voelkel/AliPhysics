@@ -157,10 +157,15 @@ TTree* AliHFTreeHandlerBplustoD0pi::BuildTree(TString name, TString title)
 bool AliHFTreeHandlerBplustoD0pi::SetVariables(int runnumber, unsigned int eventID, float ptgen, AliAODRecoDecayHF* cand, float bfield, int /*masshypo*/, AliPIDResponse* pidrespo)
 {
   fIsMCGenTree=false;
+  fFillTree = true;
 
-  if(!cand) return false;
-  if(fFillOnlySignal) { //if fill only signal and not signal candidate, do not store
-    if(!(fCandType&kSignal)) return true;
+  if(!cand) {
+    fFillTree = false;
+    return false;
+  }
+  if(fFillOnlySignal && !static_cast<bool>(fCandType&kSignal)) { //if fill only signal and not signal candidate, do not store
+    fFillTree = false;
+    return true;
   }
   fRunNumber=runnumber;
   fEvID=eventID;

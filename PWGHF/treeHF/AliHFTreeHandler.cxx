@@ -95,7 +95,8 @@ AliHFTreeHandler::AliHFTreeHandler():
   fSubJetRadius(0.2),
   fJetAlgorithm(0),
   fSubJetAlgorithm(2),
-  fMinJetPt(0.0)
+  fMinJetPt(0.0),
+  fFillTree(true)
 {
   //
   // Default constructor

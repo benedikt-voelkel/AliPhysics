@@ -95,16 +95,14 @@ class AliHFTreeHandler : public TObject
     void SetJetTreeVars(AliHFJet hfjet);
     void SetGenJetTreeVars(AliHFJet hfjet);
 
-
-    void FillTree() { //to be called for each candidate!
-      if(fFillOnlySignal && !(fCandType&kSignal)) { //if fill only signal and not signal candidate, do not store 
-        fCandType=0;
+    void FillTree(bool forceFill = false) { //to be called for each candidate!
+      if(!forceFill && !fFillTree) {
+        fCandType = 0;
+        return;
       }
-      else {      
-        fTreeVar->Fill(); 
-        fCandType=0;
-        fRunNumberPrevCand = fRunNumber;
-      }
+      fTreeVar->Fill(); 
+      fCandType=0;
+      fRunNumberPrevCand = fRunNumber;
     } 
     
     //common methods
@@ -278,6 +276,8 @@ class AliHFTreeHandler : public TObject
     Int_t fJetAlgorithm; //Jet finding algorithm
     Int_t fSubJetAlgorithm; //SubJet finding algorithm
     Double_t fMinJetPt; //Jet finding mimimum Jet pT
+    // Flag if tree should be filled after valriables have been set
+    bool fFillTree;
 
   /// \cond CLASSIMP
   ClassDef(AliHFTreeHandler,9); ///
